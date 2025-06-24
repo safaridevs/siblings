@@ -2,101 +2,101 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <title>Name Puzzle with Next Button</title>
+    <title>Mobile-Friendly Name Puzzle</title>
     <style>
-      <style>
-  body {
-    font-family: sans-serif;
-    background: linear-gradient(to bottom right, #fffde7, #fce4ec);
-    text-align: center;
-    padding: 20px;
-  }
+      body {
+        font-family: sans-serif;
+        background: linear-gradient(to bottom right, #fffde7, #fce4ec);
+        text-align: center;
+        padding: 20px;
+      }
 
-  h1 {
-    color: #ff4081;
-    margin-bottom: 10px;
-    text-align:center;
-    
-  }
+      h1 {
+        color: #ff4081;
+        margin-bottom: 10px;
+      }
 
-  .letter-bank, .slots {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    margin: 20px;
-    gap: 10px;
-  }
+      .letter-bank,
+      .slots {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        margin: 20px;
+        gap: 10px;
+      }
 
-  .letter {
-    width: 60px;
-    height: 60px;
-    font-size: 28px;
-    border: 3px solid #4caf50;
-    border-radius: 10px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background-color: #ffcc80; /* orange-yellow */
-    cursor: grab;
-    transition: transform 0.2s;
-  }
+      .letter,
+      .slot {
+        width: 60px;
+        height: 60px;
+        font-size: 28px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        user-select: none;
+      }
 
-  .letter:hover {
-    transform: scale(1.1);
-    background-color: #ffd54f;
-  }
+      .letter {
+        background-color: #ffcc80;
+        border: 3px solid #4caf50;
+        cursor: pointer;
+      }
 
-  .slot {
-    width: 60px;
-    height: 60px;
-    font-size: 28px;
-    border: 3px dashed #2196f3;
-    border-radius: 10px;
-    background-color: #bbdefb;
-  }
+      .letter.selected {
+        border: 3px solid #f44336;
+        box-shadow: 0 0 8px #f44336;
+      }
 
-  .slot.filled {
-    background-color: #c8e6c9;
-    border-style: solid;
-  }
+      .slot {
+        border: 3px dashed #2196f3;
+        background-color: #bbdefb;
+      }
 
-  .space {
-    width: 30px;
-    height: 60px;
-    background-color: transparent;
-    border: none;
-  }
+      .slot.filled {
+        background-color: #c8e6c9;
+        border-style: solid;
+      }
 
-  #message {
-    font-size: 1.7em;
-    color: #4caf50;
-    margin-top: 20px;
-    animation: pop 0.5s ease-in-out;
-  }
+      .space {
+        width: 30px;
+        height: 60px;
+        background-color: transparent;
+        border: none;
+      }
 
-  @keyframes pop {
-    0% { transform: scale(0.8); opacity: 0.2; }
-    100% { transform: scale(1); opacity: 1; }
-  }
+      #message {
+        font-size: 1.7em;
+        color: #4caf50;
+        margin-top: 20px;
+        animation: pop 0.5s ease-in-out;
+      }
 
-  #next-button {
-    margin-top: 20px;
-    padding: 12px 25px;
-    font-size: 18px;
-    background-color: #f06292;
-    color: white;
-    border: none;
-    
-    border-radius: 8px;
-    cursor: pointer;
-    transition: background-color 0.3s;
-  }
+      @keyframes pop {
+        0% {
+          transform: scale(0.8);
+          opacity: 0.2;
+        }
+        100% {
+          transform: scale(1);
+          opacity: 1;
+        }
+      }
 
-  #next-button:hover {
-    background-color: #ec407a;
-  }
-</style>
+      #next-button {
+        margin-top: 20px;
+        padding: 12px 25px;
+        font-size: 18px;
+        background-color: #f06292;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+      }
 
+      #next-button:hover {
+        background-color: #ec407a;
+      }
     </style>
   </head>
   <body>
@@ -104,8 +104,7 @@
     <div id="letter-bank" class="letter-bank"></div>
     <div id="slots" class="slots"></div>
     <div id="message"></div>
-    
-    <button id="next-button" style="align:center">Next</button>
+    <button id="next-button">Next</button>
 
     <script>
       const siblings = [
@@ -116,7 +115,7 @@
       ];
 
       let answer = "";
-      let dragged;
+      let selectedLetter = null;
 
       function pickRandomName() {
         const sibling = siblings[Math.floor(Math.random() * siblings.length)];
@@ -144,39 +143,38 @@
         letterBank.innerHTML = "";
         slots.innerHTML = "";
         document.getElementById("message").innerText = "";
+        selectedLetter = null;
 
-        // Create draggable letters
+        // Create letters
         shuffled.forEach((char, index) => {
           const div = document.createElement("div");
           div.className = "letter";
           div.textContent = char;
-          div.draggable = true;
-          div.id = "letter-" + index;
-
-          div.addEventListener("dragstart", (e) => {
-            dragged = div;
+          div.addEventListener("click", () => {
+            if (selectedLetter) selectedLetter.classList.remove("selected");
+            selectedLetter = div;
+            div.classList.add("selected");
           });
-
           letterBank.appendChild(div);
         });
 
-        // Create slots (with space handling)
+        // Create slots
         fullName.split("").forEach((char, index) => {
           if (char === " ") {
-            const spacer = document.createElement("div");
-            spacer.className = "space";
-            slots.appendChild(spacer);
+            const space = document.createElement("div");
+            space.className = "space";
+            slots.appendChild(space);
           } else {
             const slot = document.createElement("div");
             slot.className = "slot";
             slot.dataset.correct = char;
 
-            slot.addEventListener("dragover", (e) => e.preventDefault());
-
-            slot.addEventListener("drop", (e) => {
-              if (!slot.hasChildNodes()) {
-                slot.appendChild(dragged);
+            slot.addEventListener("click", () => {
+              if (!slot.hasChildNodes() && selectedLetter) {
+                slot.appendChild(selectedLetter);
                 slot.classList.add("filled");
+                selectedLetter.classList.remove("selected");
+                selectedLetter = null;
                 checkAnswer();
               }
             });
@@ -204,7 +202,6 @@
         buildGame();
       });
 
-      // Start the game
       buildGame();
     </script>
   </body>
