@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Name Puzzle with Next Button</title>
+    <style>
+      <style>
+  body {
+    font-family: sans-serif;
+    background: linear-gradient(to bottom right, #fffde7, #fce4ec);
+    text-align: center;
+    padding: 20px;
+  }
+
+  h1 {
+    color: #ff4081;
+    margin-bottom: 10px;
+    text-align:center;
+    
+  }
+
+  .letter-bank, .slots {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin: 20px;
+    gap: 10px;
+  }
+
+  .letter {
+    width: 60px;
+    height: 60px;
+    font-size: 28px;
+    border: 3px solid #4caf50;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #ffcc80; /* orange-yellow */
+    cursor: grab;
+    transition: transform 0.2s;
+  }
+
+  .letter:hover {
+    transform: scale(1.1);
+    background-color: #ffd54f;
+  }
+
+  .slot {
+    width: 60px;
+    height: 60px;
+    font-size: 28px;
+    border: 3px dashed #2196f3;
+    border-radius: 10px;
+    background-color: #bbdefb;
+  }
+
+  .slot.filled {
+    background-color: #c8e6c9;
+    border-style: solid;
+  }
+
+  .space {
+    width: 30px;
+    height: 60px;
+    background-color: transparent;
+    border: none;
+  }
+
+  #message {
+    font-size: 1.7em;
+    color: #4caf50;
+    margin-top: 20px;
+    animation: pop 0.5s ease-in-out;
+  }
+
+  @keyframes pop {
+    0% { transform: scale(0.8); opacity: 0.2; }
+    100% { transform: scale(1); opacity: 1; }
+  }
+
+  #next-button {
+    margin-top: 20px;
+    padding: 12px 25px;
+    font-size: 18px;
+    background-color: #f06292;
+    color: white;
+    border: none;
+    
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+  }
+
+  #next-button:hover {
+    background-color: #ec407a;
+  }
+</style>
+
+    </style>
+  </head>
+  <body>
+    <h1>Spell Your Sibling’s Full Name</h1>
+    <div id="letter-bank" class="letter-bank"></div>
+    <div id="slots" class="slots"></div>
+    <div id="message"></div>
+    
+    <button id="next-button" style="align:center">Next</button>
+
+    <script>
+      const siblings = [
+        { first: "Faith", middle: "Jelimo", last: "Cheruiyot" },
+        { first: "Joy", middle: "Jepchumba", last: "Cheruiyot" },
+        { first: "Nicole", middle: "Jepkemboi", last: "Cheruiyot" },
+        { first: "Naomi", middle: "Jepchirchir", last: "Kosgei" },
+      ];
+
+      let answer = "";
+      let dragged;
+
+      function pickRandomName() {
+        const sibling = siblings[Math.floor(Math.random() * siblings.length)];
+        const fullName =
+          `${sibling.first} ${sibling.middle} ${sibling.last}`.toUpperCase();
+        answer = fullName;
+        return fullName;
+      }
+
+      function shuffle(array) {
+        for (let i = array.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [array[i], array[j]] = [array[j], array[i]];
+        }
+        return array;
+      }
+
+      function buildGame() {
+        const fullName = pickRandomName();
+        const lettersOnly = fullName.replace(/\s+/g, "");
+        const shuffled = shuffle(lettersOnly.split(""));
+
+        const letterBank = document.getElementById("letter-bank");
+        const slots = document.getElementById("slots");
+        letterBank.innerHTML = "";
+        slots.innerHTML = "";
+        document.getElementById("message").innerText = "";
+
+        // Create draggable letters
+        shuffled.forEach((char, index) => {
+          const div = document.createElement("div");
+          div.className = "letter";
+          div.textContent = char;
+          div.draggable = true;
+          div.id = "letter-" + index;
+
+          div.addEventListener("dragstart", (e) => {
+            dragged = div;
+          });
+
+          letterBank.appendChild(div);
+        });
+
+        // Create slots (with space handling)
+        fullName.split("").forEach((char, index) => {
+          if (char === " ") {
+            const spacer = document.createElement("div");
+            spacer.className = "space";
+            slots.appendChild(spacer);
+          } else {
+            const slot = document.createElement("div");
+            slot.className = "slot";
+            slot.dataset.correct = char;
+
+            slot.addEventListener("dragover", (e) => e.preventDefault());
+
+            slot.addEventListener("drop", (e) => {
+              if (!slot.hasChildNodes()) {
+                slot.appendChild(dragged);
+                slot.classList.add("filled");
+                checkAnswer();
+              }
+            });
+
+            slots.appendChild(slot);
+          }
+        });
+      }
+
+      function checkAnswer() {
+        const slots = document.querySelectorAll(".slot");
+        let userAnswer = "";
+        for (let slot of slots) {
+          userAnswer += slot.firstChild?.textContent || "_";
+        }
+
+        const correctAnswer = answer.replace(/\s+/g, "");
+        if (userAnswer === correctAnswer) {
+          document.getElementById("message").textContent =
+            "🎉 Success! You spelled it right!";
+        }
+      }
+
+      document.getElementById("next-button").addEventListener("click", () => {
+        buildGame();
+      });
+
+      // Start the game
+      buildGame();
+    </script>
+  </body>
+</html>
